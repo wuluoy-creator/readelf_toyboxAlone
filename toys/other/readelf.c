@@ -472,15 +472,15 @@ static void scan_elf()
   struct sh dynamic = {}, dynstr = {}, dynsym = {}, shstr = {}, strtab = {},
     symtab = {}, s;
   struct ph ph;
-  yukisu_readelf_header header;
-  yukisu_readelf_status status;
+  zysu_readelf_header header;
+  zysu_readelf_status status;
   unsigned version, flags;
   unsigned long long entry;
   int type, machine, ehsize, phnum, shstrndx, i, j, w;
 
-  status = yukisu_readelf_parse_header(TT.elf, TT.size, TT.size, &header, 0);
-  if (status != YUKISU_READELF_OK)
-    return error_msg("%s: %s", TT.f, yukisu_readelf_status_string(status));
+  status = zysu_readelf_parse_header(TT.elf, TT.size, TT.size, &header, 0);
+  if (status != ZYSU_READELF_OK)
+    return error_msg("%s: %s", TT.f, zysu_readelf_status_string(status));
 
   TT.bits = header.elf_class - 1;
   TT.endian = header.data_encoding;
@@ -514,17 +514,17 @@ static void scan_elf()
     extended_shstrndx = elf_int(&section_zero);
     extended_phnum = elf_int(&section_zero);
 
-    if (header.header_flags & YUKISU_READELF_EXTENDED_PHNUM) {
+    if (header.header_flags & ZYSU_READELF_EXTENDED_PHNUM) {
       if (extended_phnum > INT_MAX)
         return error_msg("%s: extended phnum too large", TT.f);
       phnum = extended_phnum;
     }
-    if (header.header_flags & YUKISU_READELF_EXTENDED_SHNUM) {
+    if (header.header_flags & ZYSU_READELF_EXTENDED_SHNUM) {
       if (extended_shnum > INT_MAX)
         return error_msg("%s: extended shnum too large", TT.f);
       TT.shnum = extended_shnum;
     }
-    if (header.header_flags & YUKISU_READELF_EXTENDED_SHSTRNDX) {
+    if (header.header_flags & ZYSU_READELF_EXTENDED_SHSTRNDX) {
       if (extended_shstrndx > INT_MAX)
         return error_msg("%s: extended shstrndx too large", TT.f);
       shstrndx = extended_shstrndx;

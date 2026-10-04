@@ -78,14 +78,14 @@ static void make_elf32(uint8_t* output, int big_endian)
 static void test_elf64(int big_endian)
 {
   uint8_t bytes[256];
-  yukisu_readelf_header header;
-  yukisu_readelf_error error;
+  zysu_readelf_header header;
+  zysu_readelf_error error;
 
   make_elf64(bytes, big_endian);
-  assert(yukisu_readelf_parse_header(bytes, 64, sizeof(bytes), &header,
-                                     &error) == YUKISU_READELF_OK);
-  assert(error.status == YUKISU_READELF_OK);
-  assert(header.api_version == YUKISU_READELF_API_VERSION);
+  assert(zysu_readelf_parse_header(bytes, 64, sizeof(bytes), &header,
+                                     &error) == ZYSU_READELF_OK);
+  assert(error.status == ZYSU_READELF_OK);
+  assert(header.api_version == ZYSU_READELF_API_VERSION);
   assert(header.elf_class == 2);
   assert(header.data_encoding == (big_endian ? 2 : 1));
   assert(header.machine == 183);
@@ -99,11 +99,11 @@ static void test_elf64(int big_endian)
 static void test_elf32(int big_endian)
 {
   uint8_t bytes[160];
-  yukisu_readelf_header header;
+  zysu_readelf_header header;
 
   make_elf32(bytes, big_endian);
-  assert(yukisu_readelf_parse_header(bytes, 52, sizeof(bytes), &header, 0)
-         == YUKISU_READELF_OK);
+  assert(zysu_readelf_parse_header(bytes, 52, sizeof(bytes), &header, 0)
+         == ZYSU_READELF_OK);
   assert(header.elf_class == 1);
   assert(header.data_encoding == (big_endian ? 2 : 1));
   assert(header.machine == 40);
@@ -116,8 +116,8 @@ static void test_elf32(int big_endian)
 int main(void)
 {
   uint8_t bytes[256];
-  yukisu_readelf_header header;
-  yukisu_readelf_error error;
+  zysu_readelf_header header;
+  zysu_readelf_error error;
 
   test_elf64(0);
   test_elf64(1);
@@ -125,35 +125,35 @@ int main(void)
   test_elf32(1);
 
   make_elf64(bytes, 0);
-  assert(yukisu_readelf_parse_header(bytes, 4, sizeof(bytes), &header,
-                                     &error) == YUKISU_READELF_TRUNCATED);
+  assert(zysu_readelf_parse_header(bytes, 4, sizeof(bytes), &header,
+                                     &error) == ZYSU_READELF_TRUNCATED);
   bytes[4] = 0;
-  assert(yukisu_readelf_parse_header(bytes, 64, sizeof(bytes), &header,
-                                     &error) == YUKISU_READELF_BAD_CLASS);
+  assert(zysu_readelf_parse_header(bytes, 64, sizeof(bytes), &header,
+                                     &error) == ZYSU_READELF_BAD_CLASS);
   make_elf64(bytes, 0);
   bytes[5] = 0;
-  assert(yukisu_readelf_parse_header(bytes, 64, sizeof(bytes), &header,
-                                     &error) == YUKISU_READELF_BAD_ENDIAN);
+  assert(zysu_readelf_parse_header(bytes, 64, sizeof(bytes), &header,
+                                     &error) == ZYSU_READELF_BAD_ENDIAN);
   make_elf64(bytes, 0);
   bytes[6] = 0;
-  assert(yukisu_readelf_parse_header(bytes, 64, sizeof(bytes), &header,
+  assert(zysu_readelf_parse_header(bytes, 64, sizeof(bytes), &header,
                                      &error) ==
-         YUKISU_READELF_BAD_IDENT_VERSION);
+         ZYSU_READELF_BAD_IDENT_VERSION);
   make_elf64(bytes, 0);
   put64(bytes+40, 240, 0);
-  assert(yukisu_readelf_parse_header(bytes, 64, sizeof(bytes), &header,
-                                     &error) == YUKISU_READELF_MALFORMED);
+  assert(zysu_readelf_parse_header(bytes, 64, sizeof(bytes), &header,
+                                     &error) == ZYSU_READELF_MALFORMED);
   make_elf64(bytes, 0);
   put16(bytes+56, 0xffff, 0);
   put16(bytes+54, 0, 0);
-  assert(yukisu_readelf_parse_header(bytes, 64, sizeof(bytes), &header,
-                                     &error) == YUKISU_READELF_MALFORMED);
+  assert(zysu_readelf_parse_header(bytes, 64, sizeof(bytes), &header,
+                                     &error) == ZYSU_READELF_MALFORMED);
   make_elf64(bytes, 0);
   put16(bytes+56, 0xffff, 0);
   put32(bytes+120+44, 1, 0);
-  assert(yukisu_readelf_parse_header(bytes, 64, sizeof(bytes), &header,
-                                     &error) == YUKISU_READELF_OK);
-  assert(header.header_flags & YUKISU_READELF_EXTENDED_PHNUM);
+  assert(zysu_readelf_parse_header(bytes, 64, sizeof(bytes), &header,
+                                     &error) == ZYSU_READELF_OK);
+  assert(header.header_flags & ZYSU_READELF_EXTENDED_PHNUM);
 
   puts("structured readelf API tests passed");
   return 0;

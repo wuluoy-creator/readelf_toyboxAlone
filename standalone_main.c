@@ -1,5 +1,5 @@
-extern int yukisu_toybox_main(int argc, char** argv);
+extern int zysu_toybox_main(int argc, char** argv);
 
 int main(int argc, char** argv) {
-    return yukisu_toybox_main(argc, argv);
+    return zysu_toybox_main(argc, argv);
 }

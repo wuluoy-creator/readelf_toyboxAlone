@@ -64,7 +64,7 @@ add_custom_command(
         --nm ${CMAKE_NM}
         --objcopy ${CMAKE_OBJCOPY}
         --ranlib ${CMAKE_RANLIB}
-        --prefix yukisu_toybox_
+        --prefix zysu_toybox_
         --input $<TARGET_FILE:readelf_toybox_raw>
         --output ${READELF_TOYBOX_NAMESPACED_ARCHIVE}
     DEPENDS

@@ -8,37 +8,37 @@
 extern "C" {
 #endif
 
-#define YUKISU_READELF_API_VERSION 1U
-#define YUKISU_READELF_IDENT_SIZE 16U
+#define ZYSU_READELF_API_VERSION 1U
+#define ZYSU_READELF_IDENT_SIZE 16U
 
-typedef enum yukisu_readelf_status {
-  YUKISU_READELF_OK = 0,
-  YUKISU_READELF_INVALID_ARGUMENT = 1,
-  YUKISU_READELF_NOT_ELF = 2,
-  YUKISU_READELF_TRUNCATED = 3,
-  YUKISU_READELF_BAD_CLASS = 4,
-  YUKISU_READELF_BAD_ENDIAN = 5,
-  YUKISU_READELF_BAD_IDENT_VERSION = 6,
-  YUKISU_READELF_MALFORMED = 7,
-} yukisu_readelf_status;
+typedef enum zysu_readelf_status {
+  ZYSU_READELF_OK = 0,
+  ZYSU_READELF_INVALID_ARGUMENT = 1,
+  ZYSU_READELF_NOT_ELF = 2,
+  ZYSU_READELF_TRUNCATED = 3,
+  ZYSU_READELF_BAD_CLASS = 4,
+  ZYSU_READELF_BAD_ENDIAN = 5,
+  ZYSU_READELF_BAD_IDENT_VERSION = 6,
+  ZYSU_READELF_MALFORMED = 7,
+} zysu_readelf_status;
 
-enum yukisu_readelf_header_flags {
-  YUKISU_READELF_EXTENDED_PHNUM = 1U << 0,
-  YUKISU_READELF_EXTENDED_SHNUM = 1U << 1,
-  YUKISU_READELF_EXTENDED_SHSTRNDX = 1U << 2,
+enum zysu_readelf_header_flags {
+  ZYSU_READELF_EXTENDED_PHNUM = 1U << 0,
+  ZYSU_READELF_EXTENDED_SHNUM = 1U << 1,
+  ZYSU_READELF_EXTENDED_SHSTRNDX = 1U << 2,
 };
 
-typedef struct yukisu_readelf_error {
+typedef struct zysu_readelf_error {
   uint32_t status;
   uint32_t reserved;
   uint64_t offset;
-} yukisu_readelf_error;
+} zysu_readelf_error;
 
-typedef struct yukisu_readelf_header {
+typedef struct zysu_readelf_header {
   uint32_t api_version;
   uint32_t struct_size;
   uint64_t file_size;
-  uint8_t ident[YUKISU_READELF_IDENT_SIZE];
+  uint8_t ident[ZYSU_READELF_IDENT_SIZE];
   uint8_t elf_class;
   uint8_t data_encoding;
   uint8_t ident_version;
@@ -59,7 +59,7 @@ typedef struct yukisu_readelf_header {
   uint16_t section_header_entry_size;
   uint16_t section_header_count;
   uint16_t section_name_index;
-} yukisu_readelf_header;
+} zysu_readelf_header;
 
 // Decode an ELF header from its leading bytes. header_bytes must contain at
 // least the complete class-specific ELF header (52 bytes for ELF32, 64 for
@@ -67,14 +67,14 @@ typedef struct yukisu_readelf_header {
 //
 // This API is reentrant and never writes to stdio, exits, or uses Toybox
 // global state. The Toybox readelf CLI uses this same decoder.
-yukisu_readelf_status yukisu_readelf_parse_header(
+zysu_readelf_status zysu_readelf_parse_header(
     const void* header_bytes,
     size_t header_bytes_size,
     uint64_t file_size,
-    yukisu_readelf_header* output,
-    yukisu_readelf_error* error);
+    zysu_readelf_header* output,
+    zysu_readelf_error* error);
 
-const char* yukisu_readelf_status_string(yukisu_readelf_status status);
+const char* zysu_readelf_status_string(zysu_readelf_status status);
 
 #ifdef __cplusplus
 }

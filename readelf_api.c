@@ -19,8 +19,8 @@ enum {
   SHN_XINDEX_VALUE = 0xffff,
 };
 
-static void set_error(yukisu_readelf_error* error,
-                      yukisu_readelf_status status, uint64_t offset)
+static void set_error(zysu_readelf_error* error,
+                      zysu_readelf_status status, uint64_t offset)
 {
   if (!error) return;
   memset(error, 0, sizeof(*error));
@@ -71,9 +71,9 @@ static int table_fits(uint64_t offset, uint16_t entry_size, uint16_t count,
   return table_size <= file_size - offset;
 }
 
-yukisu_readelf_status yukisu_readelf_parse_header(
+zysu_readelf_status zysu_readelf_parse_header(
     const void* header_bytes, size_t header_bytes_size, uint64_t file_size,
-    yukisu_readelf_header* output, yukisu_readelf_error* error)
+    zysu_readelf_header* output, zysu_readelf_error* error)
 {
   const uint8_t* bytes = (const uint8_t*)header_bytes;
   const uint8_t* cursor;
@@ -82,30 +82,30 @@ yukisu_readelf_status yukisu_readelf_parse_header(
   int big_endian;
 
   if (!bytes || !output) {
-    set_error(error, YUKISU_READELF_INVALID_ARGUMENT, 0);
-    return YUKISU_READELF_INVALID_ARGUMENT;
+    set_error(error, ZYSU_READELF_INVALID_ARGUMENT, 0);
+    return ZYSU_READELF_INVALID_ARGUMENT;
   }
 
   memset(output, 0, sizeof(*output));
-  output->api_version = YUKISU_READELF_API_VERSION;
+  output->api_version = ZYSU_READELF_API_VERSION;
   output->struct_size = (uint32_t)sizeof(*output);
   output->file_size = file_size;
 
   if (header_bytes_size < 4 || file_size < 4) {
-    set_error(error, YUKISU_READELF_TRUNCATED, header_bytes_size);
-    return YUKISU_READELF_TRUNCATED;
+    set_error(error, ZYSU_READELF_TRUNCATED, header_bytes_size);
+    return ZYSU_READELF_TRUNCATED;
   }
   if (memcmp(bytes, "\177ELF", 4)) {
-    set_error(error, YUKISU_READELF_NOT_ELF, 0);
-    return YUKISU_READELF_NOT_ELF;
+    set_error(error, ZYSU_READELF_NOT_ELF, 0);
+    return ZYSU_READELF_NOT_ELF;
   }
-  if (header_bytes_size < YUKISU_READELF_IDENT_SIZE ||
-      file_size < YUKISU_READELF_IDENT_SIZE) {
-    set_error(error, YUKISU_READELF_TRUNCATED, header_bytes_size);
-    return YUKISU_READELF_TRUNCATED;
+  if (header_bytes_size < ZYSU_READELF_IDENT_SIZE ||
+      file_size < ZYSU_READELF_IDENT_SIZE) {
+    set_error(error, ZYSU_READELF_TRUNCATED, header_bytes_size);
+    return ZYSU_READELF_TRUNCATED;
   }
 
-  memcpy(output->ident, bytes, YUKISU_READELF_IDENT_SIZE);
+  memcpy(output->ident, bytes, ZYSU_READELF_IDENT_SIZE);
   output->elf_class = bytes[4];
   output->data_encoding = bytes[5];
   output->ident_version = bytes[6];
@@ -114,28 +114,28 @@ yukisu_readelf_status yukisu_readelf_parse_header(
 
   if (output->elf_class != ELFCLASS32_VALUE &&
       output->elf_class != ELFCLASS64_VALUE) {
-    set_error(error, YUKISU_READELF_BAD_CLASS, 4);
-    return YUKISU_READELF_BAD_CLASS;
+    set_error(error, ZYSU_READELF_BAD_CLASS, 4);
+    return ZYSU_READELF_BAD_CLASS;
   }
   if (output->data_encoding != ELFDATA2LSB_VALUE &&
       output->data_encoding != ELFDATA2MSB_VALUE) {
-    set_error(error, YUKISU_READELF_BAD_ENDIAN, 5);
-    return YUKISU_READELF_BAD_ENDIAN;
+    set_error(error, ZYSU_READELF_BAD_ENDIAN, 5);
+    return ZYSU_READELF_BAD_ENDIAN;
   }
   if (output->ident_version != EV_CURRENT_VALUE) {
-    set_error(error, YUKISU_READELF_BAD_IDENT_VERSION, 6);
-    return YUKISU_READELF_BAD_IDENT_VERSION;
+    set_error(error, ZYSU_READELF_BAD_IDENT_VERSION, 6);
+    return ZYSU_READELF_BAD_IDENT_VERSION;
   }
 
   required_size = output->elf_class == ELFCLASS64_VALUE ? 64U : 52U;
   if (header_bytes_size < required_size || file_size < required_size) {
-    set_error(error, YUKISU_READELF_TRUNCATED,
+    set_error(error, ZYSU_READELF_TRUNCATED,
               header_bytes_size < required_size ? header_bytes_size : file_size);
-    return YUKISU_READELF_TRUNCATED;
+    return ZYSU_READELF_TRUNCATED;
   }
 
   big_endian = output->data_encoding == ELFDATA2MSB_VALUE;
-  cursor = bytes + YUKISU_READELF_IDENT_SIZE;
+  cursor = bytes + ZYSU_READELF_IDENT_SIZE;
   output->type = read_u16(cursor, big_endian);
   cursor += 2;
   output->machine = read_u16(cursor, big_endian);
@@ -178,11 +178,11 @@ yukisu_readelf_status yukisu_readelf_parse_header(
   output->section_name_index = read_u16(cursor, big_endian);
 
   if (output->program_header_count == PN_XNUM_VALUE)
-    output->header_flags |= YUKISU_READELF_EXTENDED_PHNUM;
+    output->header_flags |= ZYSU_READELF_EXTENDED_PHNUM;
   if (!output->section_header_count && output->section_header_offset)
-    output->header_flags |= YUKISU_READELF_EXTENDED_SHNUM;
+    output->header_flags |= ZYSU_READELF_EXTENDED_SHNUM;
   if (output->section_name_index == SHN_XINDEX_VALUE)
-    output->header_flags |= YUKISU_READELF_EXTENDED_SHSTRNDX;
+    output->header_flags |= ZYSU_READELF_EXTENDED_SHSTRNDX;
 
   if (output->elf_version != EV_CURRENT_VALUE ||
       output->header_size < required_size ||
@@ -202,28 +202,28 @@ yukisu_readelf_status yukisu_readelf_parse_header(
       !table_fits(output->section_header_offset,
                   output->section_header_entry_size,
                   output->section_header_count, file_size)) {
-    set_error(error, YUKISU_READELF_MALFORMED,
+    set_error(error, ZYSU_READELF_MALFORMED,
               output->program_header_offset > file_size
                   ? output->program_header_offset
                   : output->section_header_offset);
-    return YUKISU_READELF_MALFORMED;
+    return ZYSU_READELF_MALFORMED;
   }
 
-  set_error(error, YUKISU_READELF_OK, 0);
-  return YUKISU_READELF_OK;
+  set_error(error, ZYSU_READELF_OK, 0);
+  return ZYSU_READELF_OK;
 }
 
-const char* yukisu_readelf_status_string(yukisu_readelf_status status)
+const char* zysu_readelf_status_string(zysu_readelf_status status)
 {
   switch (status) {
-    case YUKISU_READELF_OK: return "ok";
-    case YUKISU_READELF_INVALID_ARGUMENT: return "invalid argument";
-    case YUKISU_READELF_NOT_ELF: return "not ELF";
-    case YUKISU_READELF_TRUNCATED: return "truncated ELF header";
-    case YUKISU_READELF_BAD_CLASS: return "unsupported ELF class";
-    case YUKISU_READELF_BAD_ENDIAN: return "unsupported ELF data encoding";
-    case YUKISU_READELF_BAD_IDENT_VERSION: return "bad ELF identification version";
-    case YUKISU_READELF_MALFORMED: return "malformed ELF header";
+    case ZYSU_READELF_OK: return "ok";
+    case ZYSU_READELF_INVALID_ARGUMENT: return "invalid argument";
+    case ZYSU_READELF_NOT_ELF: return "not ELF";
+    case ZYSU_READELF_TRUNCATED: return "truncated ELF header";
+    case ZYSU_READELF_BAD_CLASS: return "unsupported ELF class";
+    case ZYSU_READELF_BAD_ENDIAN: return "unsupported ELF data encoding";
+    case ZYSU_READELF_BAD_IDENT_VERSION: return "bad ELF identification version";
+    case ZYSU_READELF_MALFORMED: return "malformed ELF header";
   }
   return "unknown readelf error";
 }
